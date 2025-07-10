@@ -15,11 +15,22 @@ import Icon from "@/components/ui/icon";
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [revealedCodes, setRevealedCodes] = useState<number[]>([]);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev) =>
       prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id],
     );
+  };
+
+  const toggleCodeReveal = (id: number) => {
+    setRevealedCodes((prev) =>
+      prev.includes(id) ? prev.filter((code) => code !== id) : [...prev, id],
+    );
+  };
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
   };
 
   const promoCodes = [
@@ -273,17 +284,54 @@ const Index = () => {
                           <span>До {promo.expires}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={promo.code}
-                          readOnly
-                          className="flex-1 text-center font-mono bg-gray-50"
-                        />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 relative">
+                            <Input
+                              value={promo.code}
+                              readOnly
+                              className={`text-center font-mono bg-gray-50 transition-all duration-300 ${
+                                revealedCodes.includes(promo.id)
+                                  ? ""
+                                  : "blur-sm select-none"
+                              }`}
+                            />
+                            {!revealedCodes.includes(promo.id) && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80 rounded-md">
+                                <Icon
+                                  name="Eye"
+                                  className="text-gray-400"
+                                  size={16}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => copyToClipboard(promo.code)}
+                            disabled={!revealedCodes.includes(promo.id)}
+                            className="bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 disabled:opacity-50"
+                          >
+                            <Icon name="Copy" size={16} />
+                          </Button>
+                        </div>
                         <Button
+                          variant="outline"
                           size="sm"
-                          className="bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700"
+                          onClick={() => toggleCodeReveal(promo.id)}
+                          className="w-full"
                         >
-                          <Icon name="Copy" size={16} />
+                          {revealedCodes.includes(promo.id) ? (
+                            <>
+                              <Icon name="EyeOff" size={16} className="mr-2" />
+                              Скрыть код
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="Eye" size={16} className="mr-2" />
+                              Показать код
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>
